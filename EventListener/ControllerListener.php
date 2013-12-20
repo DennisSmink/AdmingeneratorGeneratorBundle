@@ -3,16 +3,19 @@
 namespace Admingenerator\GeneratorBundle\EventListener;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
 use Symfony\Component\Yaml\Yaml;
-
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 use Admingenerator\GeneratorBundle\Exception\NotAdminGeneratedException;
 use Symfony\Component\Finder\Finder;
 
+/**
+ * This listener handles cache generation
+ *
+ * @author Cédric Lombardot <cedric.lombardot@gmail.com>
+ * @author Piotr Gołębiewski <loostro@gmail.com>
+ */
 class ControllerListener
 {
     protected $container;
@@ -27,8 +30,9 @@ class ControllerListener
         if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
             try {
                 $controller = $event->getRequest()->attributes->get('_controller');
-
-                if (strstr($controller, '::')) { //Check if its a "real controller" not assetic for example
+                
+                // Check if its a "real controller" not assetic for example
+                if (strstr($controller, '::')) {
                     $generatorYaml = $this->getGeneratorYml($controller);
 
                     $generator = $this->getGenerator($generatorYaml);
@@ -38,7 +42,7 @@ class ControllerListener
 
                 }
             } catch (NotAdminGeneratedException $e) {
-                //Lets the word running this is not an admin generated module
+                // Lets the word running this is not an admin generated module
             }
         }
 
@@ -81,7 +85,11 @@ class ControllerListener
     }
 
     /**
-     * @todo Find objects in vendor dir
+     * Gets generator configuration yaml
+     *
+     * @param string $controller Controller name
+     *
+     * @return array
      */
     protected function getGeneratorYml($controller)
     {
